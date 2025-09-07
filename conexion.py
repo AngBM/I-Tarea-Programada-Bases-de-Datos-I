@@ -5,8 +5,8 @@ app = Flask(__name__)
 
 # Conexión
 conn_str = (
-    "DRIVER={ODBC Driver 17 for SQL Server};"
-    "SERVER=servidorbdcm19.database.windows.net;"
+    "DRIVER={ODBC Driver 18 for SQL Server};"
+    "SERVER=tcp:servidorbdcmb19.database.windows.net,1433;"
     "DATABASE=Tarea1 BD;"     
     "UID=AdminCMB19;"
     "PWD=adminbdCMB05;"
@@ -30,7 +30,7 @@ def index():
             cursor = conn.cursor()
             cursor.execute("""
                 DECLARE @ResultCode INT, @ResultMessage NVARCHAR(200);
-                EXEC dbo.sp_Empleado_Insertar @Nombre=?, @Salario=?, 
+                EXEC dbo.InsertEmpleado1 @Nombre=?, @Salario=?, 
                      @ResultCode=@ResultCode OUTPUT, @ResultMessage=@ResultMessage OUTPUT;
                 SELECT @ResultCode AS Code, @ResultMessage AS Message;
             """, (nombre, salario))
@@ -43,7 +43,7 @@ def index():
     # cargar lista de empleados
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("EXEC dbo.sp_Empleado_Listar")
+    cursor.execute("EXEC dbo.ObtenerEmpleados1")
     empleados = cursor.fetchall()
 
     return render_template("index.html", empleados=empleados, mensaje=mensaje)
