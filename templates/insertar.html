@@ -3,35 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <title>Insertar Empleado</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        form {
+            max-width: 400px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input {
+            width: 100%;
+            padding: 6px;
+            margin-top: 4px;
+        }
+        button, a {
+            margin-top: 15px;
+            display: inline-block;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+        }
+        a {
+            background-color: #ccc;
+            color: black;
+        }
+        .mensaje {
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        .exito {
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+    </style>
 </head>
 <body>
     <h1>Insertar Empleado</h1>
 
     {% if mensaje %}
-      <p style="color: red;">{{ mensaje }}</p>
+        <div class="mensaje {{ 'exito' if 'éxito' in mensaje else 'error' }}">
+            {{ mensaje }}
+        </div>
     {% endif %}
 
     <form method="post" action="/insertar" onsubmit="return validarFormulario()">
-        <label>Nombre:</label>
+        <label for="nombre">Nombre:</label>
         <input type="text" name="nombre" id="nombre" required>
-        <br>
-        <label>Salario:</label>
+
+        <label for="salario">Salario:</label>
         <input type="number" name="salario" id="salario" step="0.01" min="0.01" required>
-        <br>
+
         <button type="submit">Insertar</button>
         <a href="/">Regresar</a>
     </form>
 
     <script>
-      function validarFormulario() {
-          const nombre = document.getElementById("nombre").value;
-          const regex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\- ]+$/;
-          if (!regex.test(nombre)) {
-              alert("El nombre solo puede contener letras, espacios y guiones.");
-              return false;
-          }
-          return true;
-      }
+        function validarFormulario() {
+            const nombre = document.getElementById("nombre").value.trim();
+            const salario = parseFloat(document.getElementById("salario").value);
+
+            // Validar que el nombre solo tenga letras, espacios o guiones
+            const regex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\- ]+$/;
+            if (!regex.test(nombre)) {
+                alert("El nombre solo puede contener letras, espacios y guiones.");
+                return false;
+            }
+
+            // Validar salario positivo
+            if (isNaN(salario) || salario <= 0) {
+                alert("El salario debe ser un número positivo.");
+                return false;
+            }
+
+            return true;
+        }
     </script>
 </body>
 </html>
+
