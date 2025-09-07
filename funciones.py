@@ -14,21 +14,29 @@ connection = pyodbc.connect(
 
 print(" Conexión exitosa")
 def obtener_empleados():
+    
     cursor = connection.cursor()            # Abrir cursor para ejecutar SQL
-    cursor.execute("EXEC ObtenerEmpleados") # ejecuta el SP 
+    cursor.execute("EXEC ObtenerEmpleados1") # ejecuta el SP 
     resultados = cursor.fetchall()          #  Trae todos los resultados
     empleados = []                          # Crea lista vacía para guardar empleados
     for fila in resultados:                 #  Recorre cada fila del resultado
-        empleados.append({ "id": fila.id,"nombre": fila.Nombre,"salario": fila.Salario   })
+        empleados.append({
+            "id": fila[0],
+            "nombre": fila[1],
+            "salario": fila[2]
+        })
     return empleados    
 
 
 
 def insertar_empleado(nombre, salario):
-    cursor = connection.cursor()                                #  Abre cursor
-    cursor.execute(
-        "EXEC InsertEmpleado @Nombre=?, @Salario=?",            #  ejecuta  el SP con  los parámetros
-        (nombre, salario)                                       
-    )
-    connection.commit()                                         # Confirmar los cambios en la BD
-    return "Empleado insertado"                                 
+    try:
+        cursor = connection.cursor()                                #  Abre cursor
+        cursor.execute(
+            "EXEC InsertEmpleado1 @Nombre=?, @Salario=?",            #  ejecuta  el SP con  los parámetros
+            (nombre, salario)                                       
+        )
+        connection.commit()                                         # Confirmar los cambios en la BD
+        return "Empleado insertado"  
+    except pyodbc.Error as e:
+         raise Exception(e.args[1])    
