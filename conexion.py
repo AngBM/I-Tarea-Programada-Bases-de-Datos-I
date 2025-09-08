@@ -1,6 +1,7 @@
 from flask import Flask , render_template, request, redirect, url_for, flash
 import pyodbc
 import re
+import urllib.parse
 
 connection = pyodbc.connect(
     "DRIVER={ODBC Driver 18 for SQL Server};"
@@ -31,17 +32,20 @@ def obtener_empleados():
 
 
 def insertar_empleado(nombre, salario):
+    cursor = connection.cursor()
     try:
-        cursor = connection.cursor()                                #  Abre cursor
-        cursor.execute(
-            "EXEC InsertEmpleado1 @Nombre=?, @Salario=?",            #  ejecuta  el SP con  los parámetros
-            (nombre, salario)                                       
-        )
-        connection.commit()                                         # Confirmar los cambios en la BD
-        return "Empleado insertado"  
-    except pyodbc.Error as e:
-         raise Exception(e.args[1])                               
-
+        cursor.execute("EXEC InsertEmpleado1 @Nombre=?, @Salario=?", (nombre, salario))
+        connection.commit()
+        return f"Empleado '{nombre}' insertado con éxito."
+    except pyodbc.ProgrammingError as pe:
+        if "Nombre de empleado ya existe" in str(pe):
+            return f"Error: El nombre '{nombre}' ya existe."
+        else:
+            return f"Error de programación: {str(pe)}"
+    except Exception as e:
+        return f"Error inesperado: {str(e)}"
+    finally:
+        cursor.close()
 
 #-------------------------------------------------------------------------------------
 #para ver todos los empleados
@@ -56,19 +60,30 @@ def pantalla_principal():
 def mostrar_insertar():
     return render_template("insertar.html")
 
-@app.route("/insertar", methods=["POST"])
+
+@app.route("/insertar", methods=["GET", "POST"])
 def procesar_insertar():
-    nombre = request.form["nombre"]
-    salario = request.form["salario"]
-
-    try:
-        salario = float(salario)
+    if request.method == "POST":
+        nombre = request.form["nombre"].strip()
+        salario = request.form["salario"].strip()
+        try:
+            salario = float(salario)
+        except ValueError:
+            mensaje = "El salario debe ser un número válido."
+            return render_template("insertar.html", mensaje=mensaje)
+        
         mensaje = insertar_empleado(nombre, salario)
-    except Exception as e:
-        mensaje = f"Error al insertar: {str(e)}"
+        # Redirigir a la página principal con el mensaje como parámetro
+        return render_template("insertar.html", mensaje=mensaje)
 
-    empleados = obtener_empleados()
-    return render_template("index.html", empleados=empleados, mensaje=mensaje)
+    
+    return render_template("insertar.html")
+
+@app.route("/")
+def index():
+    mensaje = request.args.get("mensaje")  # Tomamos el mensaje de la URL si existe
+    return render_template("index.html", mensaje=mensaje)
 
 if __name__ == "__main__":
     app.run(debug=True)
+
