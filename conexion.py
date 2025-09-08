@@ -52,6 +52,26 @@ def pantalla_principal():
     empleados=obtener_empleados()
     return render_template ("index.html",empleados=empleados)
 
+@app.route("/insertar", methods=["GET"])
+def mostrar_insertar():
+    return render_template("insertar.html")
+
+@app.route("/insertar", methods=["POST"])
+def procesar_insertar():
+    nombre = request.form["nombre"]
+    salario = request.form["salario"]
+
+    try:
+        salario = float(salario)
+        mensaje = insertar_empleado(nombre, salario)
+    except Exception as e:
+        mensaje = f"Error al insertar: {str(e)}"
+
+    empleados = obtener_empleados()
+    return render_template("index.html", empleados=empleados, mensaje=mensaje)
+
+
+
 
 
 
