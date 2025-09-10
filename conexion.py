@@ -79,10 +79,7 @@ def procesar_insertar():
     
     return render_template("insertar.html")
 
-@app.route("/")
-def index():
-    mensaje = request.args.get("mensaje")  # Tomamos el mensaje de la URL si existe
-    return render_template("index.html", mensaje=mensaje)
+
 
 if __name__ == "__main__":
     app.run(debug=True)
